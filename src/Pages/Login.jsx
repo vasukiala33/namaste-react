@@ -67,7 +67,7 @@ const Login = () => {
                 onBlur={formik.handleBlur}
               />
               {formik.touched.name && formik.errors.name && (
-                <div className="text-red-600">{formik.errors.name}</div>
+                <div className="text-red-700">{formik.errors.name}</div>
               )}
             </div>
           )}

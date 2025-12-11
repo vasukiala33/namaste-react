@@ -1,58 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { BGLOGIN_URL, API_URL } from "../utils/constants";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { BGLOGIN_URL, API_URL } from "../utils/constants";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import Alert from "../utils/alert";
-import JWT from "../utils/jwtdecode";
 
-const Login = () => {
+const Signup = () => {
   const [alertMessage, setAlerMessage] = useState("");
   const navigate = useNavigate();
-
   const validations = Yup.object({
+    name: Yup.string().required("please enter the name"),
     email: Yup.string()
-      .required("mail id is required")
-      .email("please enter valid mail id"),
+      .required("mail id required")
+      .email('"please enter valid mail id'),
     password: Yup.string()
       .required("password is required")
-      .min(6, "min 6 characters")
-      .max(10, "max 10 characters"),
+      .min(6, "min 6 character")
+      .max(10, "min 10 character"),
   });
 
-  const initialValues = { email: "", password: "" };
-
-  const signInData = async (values) => {
+  const signUpData = async (values) => {
     try {
-      const res = await axios.post(`${API_URL}/api/v1/auth/signin`, values);
-      // console.log(res);
-      if (res.status === 200) {
-        const token = res.data.access_token;
-        localStorage.setItem("token", token);
-        setAlerMessage("Login Successful");
-        navigate("/home");
+      const res = await axios.post(`${API_URL}/api/v1/auth/signup`, values);
+      if (res.status === 201) {
         formik.resetForm();
+        setAlerMessage("Created Succesfully");
       }
     } catch (error) {
       console.log("error", error);
-      setAlerMessage("Login failed");
+      setAlerMessage("failed to create");
     }
   };
 
   const formik = useFormik({
-    initialValues,
+    initialValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
     validationSchema: validations,
+    onSubmit: signUpData,
     enableReinitialize: true,
-    onSubmit: signInData,
     validateOnChange: false,
     validateOnBlur: false,
   });
 
   const handleSignup = () => {
-    navigate("/signup");
+    navigate("/login");
   };
-
   return (
     <div
       className="w-screen h-screen flex justify-center items-center  bg-gray-50 bg-center bg-cover bg-no-repeat relative"
@@ -60,13 +56,28 @@ const Login = () => {
     >
       <div className="border w-1/3 rounded-3xl px-12 py-15 bg-gray-100 shadow-lg backdrop-blur-sm ">
         <h1 className="text-2xl mb-10 text-center font-semibold ">
-          Please Sign In
+          Please Sign Up
         </h1>
         <form
           className="flex flex-col w-full gap-4 max-w-sm mx-auto"
           autoComplete="off"
           onSubmit={formik.handleSubmit}
         >
+          <div className="flex flex-col gap-1">
+            <label className="text-lg font-medium">Name</label>
+            <input
+              type="name"
+              name="name"
+              className="border rounded w-full p-1.5"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+            {formik.touched.name && formik.errors.name && (
+              <div className="text-red-700">{formik.errors.name}</div>
+            )}
+          </div>
+
           <div className="flex flex-col gap-1">
             <label className="text-lg font-medium">Email</label>
             <input
@@ -100,25 +111,21 @@ const Login = () => {
             type="submit"
             className="border cursor-pointer rounded-2xl bg-green-800 w-full  text-white py-1.5 text-lg mt-4  hover:bg-green-900 hover:scale-104 transition-all duration-900 ease-in-out"
           >
-            Sign In
+            Sign Up
           </button>
           <p>
-            New user ?
+            already have a account?
             <span onClick={handleSignup} className="cursor-pointer">
-              Sign Up
+              Sign In
             </span>
           </p>
         </form>
       </div>
       {alertMessage && (
-        <Alert
-          message={alertMessage}
-          onClose={() => setAlerMessage("")}
-          className="relative"
-        />
+        <Alert message={alertMessage} onClose={() => setAlerMessage("")} />
       )}
     </div>
   );
 };
 
-export default Login;
+export default Signup;
